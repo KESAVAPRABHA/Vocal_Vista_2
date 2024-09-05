@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
 import styles from './LoginPageStyles';
+import axios from 'axios';
 
 const DoctorLogin = ({ navigation }) => {
     const [formData, setFormData] = useState({
-        doctorId: '',
+        DoctorId: '',
         password: '',
     });
 
@@ -17,12 +18,21 @@ const DoctorLogin = ({ navigation }) => {
         });
     };
 
-    const handleSubmit = () => {
-        if (formData.doctorId === '' || formData.password === '') {
+    const handleSubmit = async () => {
+        if (formData.DoctorId === '' || formData.password === '') {
             setError('All fields are required!');
         } else {
             console.log(formData);
             setError('');
+            try {
+                const response = await axios.post('http://localhost:5000/doctor/auth/login', formData);
+                console.log(response.data);
+                console.log("LoggedIn Successfully");
+                navigation.navigate('Therepist');
+            } catch (err) {
+                console.error(err.message);
+                setError('Login failed. Please try again.');
+            }
         }
     };
 
@@ -33,7 +43,7 @@ const DoctorLogin = ({ navigation }) => {
                 <View style={styles.formGroup}>
                     <Text style={styles.formLabel}>Doctor ID</Text>
                     <TextInput style={styles.formInput} placeholder="Enter your Doctor ID" 
-                        value={formData.doctorId} onChangeText={(text) => handleChange('doctorId', text)} />
+                        value={formData.DoctorId} onChangeText={(text) => handleChange('DoctorId', text)} />
                 </View>
 
                 <View style={styles.formGroup}>
@@ -44,7 +54,7 @@ const DoctorLogin = ({ navigation }) => {
                 </View>
                 {error ? <Text style={styles.error}>{error}</Text> : null}
 
-                <Pressable style={styles.loginButton} onPress={()=>{navigation.navigate('Therepist')}}>
+                <Pressable style={styles.loginButton} onPress={handleSubmit}>
                     <Text style={styles.buttonText}>Login</Text>
                 </Pressable>
             </View>
